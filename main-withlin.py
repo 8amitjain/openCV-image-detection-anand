@@ -7,8 +7,9 @@ from collections import Counter
 import cv2
 import numpy as np
 import requests
-import urllib.request
-
+import urllib
+from io import BytesIO
+# from StringIO import StringIO
 
 # todo check if the bg of image is white.
 # todo Find objects apart from white color & check their size in reference to image
@@ -27,19 +28,25 @@ app = Flask(__name__)
 
 
 def read_image_from_url(link):
-    req = urllib.request.urlopen(link)
-    arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
-    img_arr = cv2.imdecode(arr, -1)  # 'Load it as it is'
-    return img_arr
+    # req = urllib.request.urlopen(link)
+    # arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
+    # img_arr = cv2.imdecode(arr, -1)  # 'Load it as it is'
+    # return img_arr
+    url = link['images']
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    return img
 
 
 def is_white_background(img_arr):
+        print(img_arr)
         img = img_arr
+        import pdb;pdb.set_trace()
         manual_count = {}
         w, h, channels = img.shape
         total_pixels = w * h
         number_counter = 0
-
+        print('wdwj')
         def count():
             for y in range(0, h):
                 for x in range(0, w):
@@ -586,17 +593,75 @@ def is_entire_product_visible(img_link):
 # TODO manage for other URL format
 # TODO handle 403 error with URI
 
+THRESHOLD_INTENSITY = 230
+
+def has_white_background(img):
+    # Read image into org_img variable
+    org_img = cv2.imread('images/1.jpg', cv2.IMREAD_GRAYSCALE)
+    print(org_img)
+    # cv2.imshow('Original Image', org_img)
+
+    # Create a black blank image for the mask
+    mask = np.zeros_like(org_img)
+
+    # Create a thresholded image, I set my threshold to 200 as this is the value 
+    # I found most effective in identifying light colored object
+    _, thres_img = cv2.threshold(org_img, 200, 255, cv2.THRESH_BINARY_INV)
+
+    # Find the most significant contours
+    contours, hierarchy = cv2.findContours(thres_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    print(contours)
+    # Get the outermost contours
+    outer_contours_img = max(contours, key=cv2.contourArea)
+
+    # Get the bounding rectangle of the contours
+    x,y,w,h = cv2.boundingRect(outer_contours_img)
+    # Draw a rectangle base on the bounding rectangle of the contours to our mask
+    cv2.rectangle(mask,(x,y),(x+w,y+h),(255,255,255),-1)
+    # Invert the mask so that we create a hole for the detected object in our mask
+    mask = cv2.bitwise_not(mask)
+
+    # Apply mask to the original image to subtract it and retain only the bg
+    img_bg = cv2.bitwise_and(org_img, org_img, mask=mask)
+
+    # If the size of the mask is similar to the size of the image then the bg is not white
+    if h == org_img.shape[0] and w == org_img.shape[1]:
+        return False
+
+    # Create a np array of the 
+    np_array = np.array(img_bg)
+
+    # Remove the zeroes from the "remaining bg image" so that we dont consider the black part,
+    # and find the average intensity of the remaining pixels
+    ave_intensity = np_array[np.nonzero(np_array)].mean()
+
+    if ave_intensity > THRESHOLD_INTENSITY:
+        return True
+    else:
+        return False
+
 @app.route('/',  methods=['POST'])
 def check_image():
     images = request.get_json()
+    is_white_bg = True
     results = []
-
-    is_repeated_in_set(images['images'])
+    if not has_white_background(images['images']):
+        is_white_bg = False
+    # is_repeated_in_set(images['images'])
     # for image in images['images']:
     #     print(image)
         # if not is_repeated_in_set(image):
         #     results.append(image)
-
+    results.append(
+        {
+            images['images']:[
+                    {
+                        'image' : images['images'],
+                        'is_white_bg':is_white_bg
+                    }
+                ]
+        },
+    )
     return results
 
 
@@ -619,7 +684,7 @@ def check_images():
 
     return results
 
-
-app.run(port=8000, debug=True)
+if __name__ == "__main__":
+    app.run(port=8000, debug=True)
 # app.run()
 
