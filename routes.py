@@ -10,18 +10,12 @@ r_blueprint = Blueprint('route_blueprint','__name__')
 @r_blueprint.route('/',  methods=['POST'])
 def check_image():
     images = request.get_json()
-    is_white_bg = False
-    results = {'status':'','message':'','data':[]}
+    results = {'status':'200','message':'success','data':[]}
     for image in images['images']:
-        if find_white_background(image):
-            is_white_bg = True
         results['data'].append(
                 {
                     'image_url' : image,
-                    'White Background':is_white_bg
+                    'White Background': True if find_white_background(image) else False
                 }
         )
-    if results['data']:
-        results['status'] = '200'
-        results['message'] = 'success'
     return jsonify(results)
