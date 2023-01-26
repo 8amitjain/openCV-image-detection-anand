@@ -61,3 +61,22 @@ def is_human_in_image(imgpath):
     if len(humans) > 0:
         return True
     return False
+
+
+'''
+This function will find image greyscale.
+'''
+def is_greyscale(imgpath):
+    file_name='greyscale_image'
+    f = url_to_img(url=imgpath,file_name=file_name)
+    image = Image.open(f'Images/{file_name}.{f}').convert('RGB')
+    if image.mode not in ("L", "RGB"):
+        raise ValueError("Unsupported image mode")
+
+    if image.mode == "RGB":
+        rgb = image.split()
+        if ImageChops.difference(rgb[0], rgb[1]).getextrema()[1] != 0:
+            return False
+        if ImageChops.difference(rgb[0], rgb[2]).getextrema()[1] != 0:
+            return False
+    return True
