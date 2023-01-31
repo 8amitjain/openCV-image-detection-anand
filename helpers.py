@@ -111,3 +111,19 @@ def is_aspect_ratio_1(imgpath):
     if aspect_ratio == 1:
         return True
     return False
+
+
+'''
+This function will find image greater than 1000px.
+'''
+def is_image_size_greater_than_1000px(imgpath, height=1000, width=1000):
+    file_name='image_100px'
+    f = url_to_img(url=imgpath,file_name=file_name)
+    img_arr = Image.open(f'Images/{file_name}.{f}')
+    dimensions = img_arr.size
+    image_height = dimensions[0]
+    image_width = dimensions[1]
+
+    if image_height >= height and image_width >= width:
+        return True
+    return False

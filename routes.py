@@ -25,6 +25,7 @@ def check_image():
                     'Greyscale Image' : True if is_greyscale(image) else False, # Return True if image is greyscale else False.
                     'Blurry Image' : True if is_blurry(image) else False, # Return True if image is blurry else False.
                     'Aspect Ratio 1' : True if is_aspect_ratio_1(image) else False, # Return True if image is aspect ratio is 1 else False.
+                    'Greater than 1000px' : True if is_image_size_greater_than_1000px(image) else False, # Return True if image is greater than else False.
                 }
         )
     return jsonify(results)
