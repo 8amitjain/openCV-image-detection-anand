@@ -94,3 +94,20 @@ def is_blurry(imgpath):
     if laplacian_var < 200:
         return True
     return False
+
+
+'''
+This function will find image aspect ratio.
+'''
+def is_aspect_ratio_1(imgpath):
+    file_name='aspect_ratio_image'
+    f = url_to_img(url=imgpath,file_name=file_name)
+    img_arr = Image.open(f'Images/{file_name}.{f}')
+    dimensions = img_arr.size
+    image_height = dimensions[0]
+    image_width = dimensions[1]
+
+    aspect_ratio = float(image_width) / image_height
+    if aspect_ratio == 1:
+        return True
+    return False
