@@ -2,7 +2,8 @@ from flask import request, Blueprint, jsonify
 from .helpers import (
     find_white_background,
     is_human_in_image,
-    is_greyscale
+    is_greyscale,
+    is_blurry
 )
 
 
@@ -16,10 +17,11 @@ def check_image():
     for image in images['images']:
         results['data'].append(
                 {
-                    'Image URL' : image, # Image url
+                    'Image URL' : image, # Return image url
                     'White Background' : True if find_white_background(image) else False, # Return True if image has white background else False.
                     'Human in Image' : True if is_human_in_image(image) else False, # Return True if human in image else False.
                     'Greyscale Image' : True if is_greyscale(image) else False, # Return True if image is greyscale else False.
+                    'Blurry Image' : True if is_blurry(image) else False, # Return True if image is blurry else False.
                 }
         )
     return jsonify(results)

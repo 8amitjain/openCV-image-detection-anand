@@ -80,3 +80,17 @@ def is_greyscale(imgpath):
         if ImageChops.difference(rgb[0], rgb[2]).getextrema()[1] != 0:
             return False
     return True
+
+
+'''
+This function will find image blurry.
+'''
+def is_blurry(imgpath):
+    file_name='blurry_image'
+    f = url_to_img(url=imgpath,file_name=file_name)
+    img = cv2.imread(f'Images/{file_name}.{f}', cv2.IMREAD_GRAYSCALE)
+    laplacian_var = cv2.Laplacian(img, cv2.CV_64F).var()
+
+    if laplacian_var < 200:
+        return True
+    return False
