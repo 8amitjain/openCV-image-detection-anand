@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import requests
 import urllib
+import decimal 
 
 
 '''
@@ -26,13 +27,19 @@ def url_to_img(url,file_name):
 '''
 This function will find any white background in images.
 '''
-def find_white_background(imgpath, threshold=0.3):
+def find_white_background(imgpath, threshold_start=0.03, threshold_end=0.9):
     file_name = 'white_background_image'
     f = url_to_img(url=imgpath,file_name=file_name)
     imgArr = cv2.imread(f'images/{file_name}.{f}')
     background = np.array([255, 255, 255])
     percent = (imgArr == background).sum() / imgArr.size
-    if percent >= threshold:
+    print(percent)
+    # Converting the above number into decimal  
+    decimal_value = decimal.Decimal(percent)  
+    
+    # rounding off  
+    rounded_number = decimal_value.quantize(decimal.Decimal('0.00'))  
+    if rounded_number >= threshold_start and rounded_number <= threshold_end:
         return True
     else:
         return False
